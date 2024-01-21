@@ -173,20 +173,19 @@
 
       loadingBar.style.display = "block";
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          progressBarFull.style.width = 100 * progress + "%";
-        }).then((unityInstance) => {
-          loadingBar.style.display = "none";
-          fullscreenButton.onclick = () => {
-            unityInstance.SetFullscreen(1);
-          };
-        }).catch((message) => {
-          alert(message);
-        });
-      };
+      var unityGame; // This variable can be used to access the application with .SendMessage() commands
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = function() {
+      createUnityInstance(canvas, config, function(progress) {
+        loadingBar.style.width = 100 * progress + "%";
+      }).then(function(unityInstance) {
+        unityGame = unityInstance;
+        loadingContainer.classList.add("finished");
+      }).catch(function(message) {
+        alert(message);
+      });
+    };
       document.body.appendChild(script);
     </script>
   </body>
