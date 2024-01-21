@@ -1,46 +1,49 @@
 <!DOCTYPE html>
 <html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Glb Importer Realtime</title>
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Glb Importer Realtime</title>
-  <style>
+    <style>
 
-  #unity-container {
-  position: absolute;
-  top: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50%; /* Adjust width as needed */
-}
-
-#unity-canvas {
-  width: 100%; /* Occupy full width of its container */
-  height: auto; /* Let the height adjust proportionally */
-}
-
-        #fileBrowserButton {
+      #unity-container {
       position: absolute;
-      top: 140px; /* Adjust top position as needed */
-      left: 50%; /* Center the button horizontally */
-      transform: translateX(-50%); /* Center the button horizontally */
-      z-index: 1; /* Ensure the button is on top of other elements */
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%; /* Adjust width as needed */
     }
-
-    #selectedFileName {
-      position: absolute;
-      top: 40px; /* Adjust top position as needed */
-      left: 50%; /* Center the text horizontally */
-      transform: translateX(-50%); /* Center the text horizontally */
-      z-index: 1; /* Ensure it's on top of other elements */
+    
+    #unity-canvas {
+      width: 100%; /* Occupy full width of its container */
+      height: auto; /* Let the height adjust proportionally */
     }
+    
+            #fileBrowserButton {
+          position: absolute;
+          top: 140px; /* Adjust top position as needed */
+          left: 50%; /* Center the button horizontally */
+          transform: translateX(-50%); /* Center the button horizontally */
+          z-index: 1; /* Ensure the button is on top of other elements */
+        }
+    
+        #selectedFileName {
+          position: absolute;
+          top: 40px; /* Adjust top position as needed */
+          left: 50%; /* Center the text horizontally */
+          transform: translateX(-50%); /* Center the text horizontally */
+          z-index: 1; /* Ensure it's on top of other elements */
+        }
+    
+      </style>
 
-  </style>
-</head>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
 
-<body>
-
-<button id="fileBrowserButton">Open File Browser</button>
+    <button id="fileBrowserButton">Open File Browser</button>
   <p id="selectedFileName"></p>
 
   <script>
@@ -79,40 +82,99 @@
   });
   </script>
 
-  <div id="unity-container">
-    <canvas id="unity-canvas" width=960 height=600></canvas>
-  </div>
-  <div id="unity-loading-container">
-    <div id="unity-loading-bar">
-      <div id="unity-loading-bar-inner"></div>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=600></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-loading-container"></div>
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">Glb Importer Realtime</div>
+      </div>
     </div>
-  </div>
-  <script src="Build/GLB Importer.loader.js"></script>
-  <script>
-    var buildUrl = "Build";
-    var loaderUrl = buildUrl + "/GLB Importer.loader.js";
-    var config = {
-      dataUrl: buildUrl + "/GLB Importer.data.br",
-      frameworkUrl: buildUrl + "/GLB Importer.framework.js.br",
-      codeUrl: buildUrl + "/GLB Importer.wasm.br",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "TechPulse Monkey",
-      productName: "Glb Importer Realtime",
-      productVersion: "1.0",
-    };
+    <script>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
 
-    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if(isMobile) {
-      // Define a maximum pixel ratio for mobile to avoid rendering at too high resolutions
-      const maxPixelRatioMobile = 2.0;
-      config.devicePixelRatio = Math.min(window.devicePixelRatio, maxPixelRatioMobile);
-    }
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
 
-    var canvas = document.querySelector("#unity-canvas");
-    var loadingContainer = document.querySelector("#unity-loading-container");
-    var loadingBar = document.querySelector("#unity-loading-bar-inner");
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/GLBImporter.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/GLBImporter.data",
+        frameworkUrl: buildUrl + "/GLBImporter.framework.js",
+        codeUrl: buildUrl + "/GLBImporter.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "TechPulse Monkey",
+        productName: "Glb Importer Realtime",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
 
-    var unityGame; // This variable can be used to access the application with .SendMessage() commands
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+        unityShowBanner('WebGL builds are not supported on mobile devices.');
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+
+      loadingBar.style.display = "block";
+
+       var unityGame; // This variable can be used to access the application with .SendMessage() commands
     var script = document.createElement("script");
     script.src = loaderUrl;
     script.onload = function() {
@@ -126,8 +188,6 @@
       });
     };
     document.body.appendChild(script);
-  </script>
-  <!-- Add an html debug console and handle unity rich text styling for both html and browser console-->
-</body>
-
+    </script>
+  </body>
 </html>
