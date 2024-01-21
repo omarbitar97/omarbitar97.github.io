@@ -4,10 +4,84 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | Glb Importer Realtime</title>
+
+    <style>
+
+      #unity-container {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%; /* Adjust width as needed */
+    }
+    
+    #unity-canvas {
+      width: 100%; /* Occupy full width of its container */
+      height: auto; /* Let the height adjust proportionally */
+    }
+    
+            #fileBrowserButton {
+          position: absolute;
+          top: 140px; /* Adjust top position as needed */
+          left: 50%; /* Center the button horizontally */
+          transform: translateX(-50%); /* Center the button horizontally */
+          z-index: 1; /* Ensure the button is on top of other elements */
+        }
+    
+        #selectedFileName {
+          position: absolute;
+          top: 40px; /* Adjust top position as needed */
+          left: 50%; /* Center the text horizontally */
+          transform: translateX(-50%); /* Center the text horizontally */
+          z-index: 1; /* Ensure it's on top of other elements */
+        }
+    
+      </style>
+
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
+
+    <button id="fileBrowserButton">Open File Browser</button>
+  <p id="selectedFileName"></p>
+
+  <script>
+
+   function showFileBrowserButton() {
+      var button = document.getElementById('fileBrowserButton');
+      button.style.display = 'block'; // Set display style to 'block'
+    }
+
+    function hideFileBrowserButton() {
+      var button = document.getElementById('fileBrowserButton');
+      button.style.display = 'none'; // Set display style to 'none'
+    }
+
+    // Run the function after the page has loaded
+    window.onload = function() {
+      hideFileBrowserButton();
+    };
+
+  document.getElementById('fileBrowserButton').addEventListener('click', function() {
+    var fileInput = document.createElement('input');
+    fileInput.type = 'file';
+
+    fileInput.click();
+
+    fileInput.addEventListener('change', function(event) {
+      var selectedFile = event.target.files[0];
+
+      if (selectedFile) {
+        // Pass the selected file name to the Unity application
+        if (unityGame) {
+          unityGame.SendMessage('CharacterImporter', 'HandleFileContents', selectedFile.name);
+        }
+      }
+    });
+  });
+  </script>
+  
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width=960 height=600></canvas>
       <div id="unity-loading-bar">
