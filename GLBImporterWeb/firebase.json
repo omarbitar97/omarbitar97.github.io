@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "public",
+    "headers": [
+      {
+        "source": "https://firebasestorage.googleapis.com/v0/b/glb-importer-test.appspot.com/o/Bot.glb?alt=media&token=53fb63af-4f46-42a7-985d-29ad37b66396",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "https://omarbitar.me"
+          }
+        ]
+      }
+    ]
+  }
+}
